@@ -5,6 +5,15 @@
   "version": "0.1.0",
   "publisher": "kibbewater",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KibbeWater/wirescript-lsp.git",
+    "directory": "packages/vscode"
+  },
+  "homepage": "https://github.com/KibbeWater/wirescript-lsp#readme",
+  "bugs": {
+    "url": "https://github.com/KibbeWater/wirescript-lsp/issues"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
