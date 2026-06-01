@@ -1,0 +1,24 @@
+{
+  "name": "wirescript",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Editor support (syntax highlighting + autocomplete) for the .wcode wirescript language.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/server",
+    "packages/vscode"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "node scripts/build.mjs --clean"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.2",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

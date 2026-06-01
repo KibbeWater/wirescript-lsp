@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+
+# build output
+out/
+dist/
+*.vsix
+*.tsbuildinfo
+
+# generated copies of shared assets (recreated by `npm run build`)
+packages/vscode/syntaxes/
+packages/vscode/snippets/
+packages/vscode/language-configuration.json
+editors/jetbrains/textmate/wcode.tmLanguage.json
+editors/jetbrains/textmate/language-configuration.json
+
+# logs
+*.log
+npm-debug.log*
+
+# tree-sitter generated artifacts (run `tree-sitter generate` to recreate)
+tree-sitter-wcode/build/
+tree-sitter-wcode/src/
+*.obj
+*.lib
+*.exp
+*.wasm
+
+# tree-sitter language-binding scaffolding (auto-generated; not maintained here)
+tree-sitter-wcode/bindings/
+tree-sitter-wcode/binding.gyp
+tree-sitter-wcode/Cargo.toml
+tree-sitter-wcode/Makefile
+tree-sitter-wcode/Package.swift
+tree-sitter-wcode/setup.py
+tree-sitter-wcode/pyproject.toml
+tree-sitter-wcode/.editorconfig
+tree-sitter-wcode/.gitattributes
+
+# editor / OS
+.DS_Store
+.vscode-test/
