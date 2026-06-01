@@ -1,0 +1,319 @@
+{
+  "$comment": "Canonical description of the .wcode language. Single source of truth for the LSP server (packages/server/src/catalog.ts) and the tree-sitter grammar (tree-sitter-wcode/grammar.js). Verified against wiremod-scheme/src/wcode (lexer, token, types, parser, typeck, ir) and src/constructs.",
+  "name": "wcode",
+  "displayName": "Wirescript",
+  "fileExtensions": [".wcode"],
+  "lineComment": "//",
+
+  "keywords": [
+    "module", "import", "input", "output", "let", "var",
+    "func", "return", "if", "else", "true", "false", "try"
+  ],
+  "keywordDocs": {
+    "module": "Optional module name. Must be the first line: `module name`.",
+    "import": "Import another source file: `import \"./util.wcode\"`.",
+    "input": "A boundary read (a wired-in value). `input x: Number @scanner`. The `@attr` picks the backing construct.",
+    "output": "A boundary write; must be driven. `output y: Number @screen = expr`. The `@attr` picks the backing construct.",
+    "let": "An immutable binding (inferred or annotated): `let k = a + 1`. Also instantiates devices: `let m = Memory()`.",
+    "var": "Parsed but rejected by the checker — `.wcode` has no mutable locals. Use a `Memory` device for persistent state.",
+    "func": "A reusable, non-recursive sub-circuit; every call is inlined. `func f(p: Number) -> Number { ... }`.",
+    "return": "Return a value from a `func` body.",
+    "if": "`if c { a } else { b }` is an expression — sugar for `c ? a : b`. The `else` branch is required when used as a value.",
+    "else": "The alternative branch of an `if` expression.",
+    "true": "The boolean literal `true`.",
+    "false": "The boolean literal `false`.",
+    "try": "Prefixes a failing assertion that aborts the current test row: `try #require(cond)`."
+  },
+
+  "types": ["Number", "Bool", "String", "Any"],
+  "typeDocs": {
+    "Number": "A wire number (always an f32).",
+    "Bool": "A boolean wire value. Coerces to/from Number.",
+    "String": "A text wire value. Only connects to String or Any.",
+    "Any": "The dynamic wire type — coerces to and from any other wire type."
+  },
+
+  "booleans": ["true", "false"],
+
+  "inputAttrs": [
+    { "name": "scanner", "construct": "Trigger", "doc": "Backs the input with a **Trigger** (a beam scanner). This is the default when no `@attr` is given." },
+    { "name": "money", "construct": "MoneyPot", "doc": "Backs the input with a **MoneyPot**; the read is its `total_amount`." },
+    { "name": "button", "construct": "Button", "doc": "Backs the input with a **Button**." },
+    { "name": "keypad", "construct": "Keypad", "doc": "Backs the input with a **Keypad**." }
+  ],
+  "outputAttrs": [
+    { "name": "screen", "construct": "Screen", "doc": "Drives a **Screen**. This is the default when no `@attr` is given." },
+    { "name": "led", "construct": "Led", "doc": "Drives an **LED** (expects a Bool)." },
+    { "name": "notify", "construct": "Notifier", "doc": "Drives a **Notifier**." }
+  ],
+
+  "testAttribute": {
+    "name": "Test",
+    "signature": "@Test(\"name\", arguments: [(row0...), (row1...)])",
+    "doc": "Declares a Swift-Testing-flavored test that runs against the real compiled circuit. Each `arguments` row gets its own fresh build. The following `func`'s parameters receive the row values."
+  },
+  "testMacros": [
+    { "name": "expect", "sigil": "#", "signature": "#expect(cond)", "doc": "Record a failure if `cond` is false, but keep running the row. `cond` must be exactly `Bool`." },
+    { "name": "require", "sigil": "#", "prefix": "try", "signature": "try #require(cond)", "doc": "Like `#expect`, but aborts the current argument row on failure. Written with the `try` prefix." }
+  ],
+
+  "dslBuiltins": [
+    { "name": "beam", "signature": "beam(input, distance [, info])", "minArgs": 2, "maxArgs": 3, "doc": "Fire a scanner/Trigger beam at `input`: a detection at `distance`, optionally carrying `info` (the value read as `trigger_info`)." },
+    { "name": "beamClear", "signature": "beamClear(input)", "minArgs": 1, "maxArgs": 1, "doc": "Clear a standing beam on `input` (no detection this tick)." },
+    { "name": "press", "signature": "press(input [, player])", "minArgs": 1, "maxArgs": 2, "doc": "Press a Button `input` (defaults to player 1)." },
+    { "name": "deposit", "signature": "deposit(pot, amount)", "minArgs": 2, "maxArgs": 2, "doc": "Drop a money entity worth `amount` into the MoneyPot `pot`." },
+    { "name": "submit", "signature": "submit(keypad, code [, player])", "minArgs": 2, "maxArgs": 3, "doc": "Submit `code` to a Keypad `keypad` (defaults to player 1)." },
+    { "name": "reset", "signature": "reset(keypad, code [, player])", "minArgs": 2, "maxArgs": 3, "doc": "Send the reset `code` to a Keypad `keypad` (defaults to player 1)." },
+    { "name": "force", "signature": "force(forcer, mass, distance)", "minArgs": 3, "maxArgs": 3, "doc": "Trigger a Forcer against a prop of `mass` at `distance`." },
+    { "name": "damage", "signature": "damage(target, amount [, offset])", "minArgs": 2, "maxArgs": 3, "doc": "Apply `amount` damage to a Target (optionally at `offset`)." },
+    { "name": "select", "signature": "select(dispenser, item)", "minArgs": 2, "maxArgs": 2, "doc": "Pick `item` on a dispenser." },
+    { "name": "tick", "signature": "tick([n])", "minArgs": 0, "maxArgs": 1, "doc": "Advance the wire clock by `n` ticks (default 1). One tick is 0.3 s." },
+    { "name": "wait", "signature": "wait(seconds)", "minArgs": 1, "maxArgs": 1, "doc": "Advance the clock by `seconds`, rounded up to whole ticks." }
+  ],
+
+  "worldDecls": [
+    { "name": "owner", "signature": "owner N", "doc": "Set the default owner id for emitted constructs." },
+    { "name": "player", "signature": "player N [wallet: ...] [pos: ...] [perm: true|false]", "doc": "Declare a player with optional wallet/position/permissions." },
+    { "name": "dispenser", "signature": "dispenser \"label\" [selected: \"item\"] [stock: [(\"item\", n)]]", "doc": "Declare a gun dispenser a `User` device can target." }
+  ],
+
+  "gateOps": [
+    "And", "Or", "Not", "Xor", "Nand", "Nor", "If",
+    "Add", "Subtract", "Multiply", "Divide", "Modulo", "Power", "Min", "Max",
+    "Equal", "NotEqual", "GreaterThan", "LessThan", "GreaterEqual", "LessEqual",
+    "Random", "Abs", "Floor", "Ceiling", "Round", "Sin", "Cos", "Tan", "Sqrt", "Log",
+    "Clamp", "Lerp", "Select", "Latch", "Threshold", "Invert",
+    "Concat", "Length", "Substring", "ToUpper", "ToLower",
+    "Time", "DeltaTime", "Vector2", "Vector3", "VectorGet"
+  ],
+
+  "constructs": [
+    {
+      "name": "Gate",
+      "wsch": "gate",
+      "doc": "A logic/arithmetic gate. The operation is chosen by `type:`; inputs feed ports `a`–`e` (and `process`).",
+      "params": [
+        { "name": "type", "valueKind": "enum", "enumRef": "gateOps", "doc": "The gate operation (e.g. `And`, `GreaterEqual`, `Add`, `Random`)." }
+      ],
+      "inputs": [
+        { "name": "a", "type": "Any" }, { "name": "b", "type": "Any" },
+        { "name": "c", "type": "Any" }, { "name": "d", "type": "Any" },
+        { "name": "e", "type": "Any" }, { "name": "process", "type": "Bool" }
+      ],
+      "outputs": [ { "name": "out", "type": "Any" } ]
+    },
+    {
+      "name": "Constant",
+      "wsch": "constant",
+      "doc": "A constant value source.",
+      "params": [
+        { "name": "kind", "valueKind": "enum", "enumValues": ["Number", "Bool", "String"], "doc": "The wire type of the constant." },
+        { "name": "value", "valueKind": "any", "doc": "The constant value (matches `kind`)." }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "value", "type": "Any", "doc": "The constant value; its type matches `kind`." } ]
+    },
+    {
+      "name": "Button",
+      "wsch": "button",
+      "doc": "A pressable button.",
+      "params": [
+        { "name": "toggle", "valueKind": "bool", "doc": "Toggle (latch) instead of momentary. Default false." },
+        { "name": "off_value", "valueKind": "number", "doc": "Value when off. Default 0." },
+        { "name": "on_value", "valueKind": "number", "doc": "Value when on. Default 1." },
+        { "name": "label", "valueKind": "string", "doc": "On-screen label." }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "out", "type": "Number" } ]
+    },
+    {
+      "name": "Keypad",
+      "wsch": "keypad",
+      "doc": "A code keypad.",
+      "params": [
+        { "name": "toggle", "valueKind": "bool", "doc": "Toggle instead of momentary. Default false." },
+        { "name": "off_value", "valueKind": "number", "doc": "Value when off. Default 0." },
+        { "name": "on_value", "valueKind": "number", "doc": "Value when on. Default 1." }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "out", "type": "Number" }, { "name": "input", "type": "String" } ]
+    },
+    {
+      "name": "Screen",
+      "wsch": "screen",
+      "doc": "A display screen.",
+      "params": [
+        { "name": "width", "valueKind": "number", "doc": "5–200. Default 30." },
+        { "name": "height", "valueKind": "number", "doc": "5–200. Default 30." },
+        { "name": "show_header", "valueKind": "bool", "doc": "Show the header. Default true." },
+        { "name": "label", "valueKind": "string", "doc": "Header text (max 50 chars). Default \"Screen\"." },
+        { "name": "header_color", "valueKind": "color", "doc": "RGBA tuple, components 0.0–1.0, e.g. (0.29, 0.56, 0.89, 1.0)." }
+      ],
+      "inputs": [ { "name": "value", "type": "Any" } ],
+      "outputs": []
+    },
+    {
+      "name": "Speaker",
+      "wsch": "speaker",
+      "doc": "Plays a sound.",
+      "params": [
+        { "name": "sound", "valueKind": "string", "doc": "An approved sound path, e.g. \"sounds/beep.mp3\"." },
+        { "name": "volume", "valueKind": "number", "doc": "0.1–1.0. Default 0.4." },
+        { "name": "pitch", "valueKind": "number", "doc": "0.1–3.0. Default 1.0." },
+        { "name": "distance", "valueKind": "number", "doc": "Audible distance 100–1000. Default 800." },
+        { "name": "looping", "valueKind": "bool", "doc": "Loop the sound. Default false." }
+      ],
+      "inputs": [ { "name": "emit", "type": "Bool" }, { "name": "play", "type": "Bool" }, { "name": "stop", "type": "Bool" } ],
+      "outputs": [ { "name": "playing", "type": "Bool" } ]
+    },
+    {
+      "name": "User",
+      "wsch": "user",
+      "doc": "Uses (activates) a targeted entity such as a dispenser.",
+      "params": [
+        { "name": "range", "valueKind": "number", "doc": "10–500. Default 100." },
+        { "name": "target", "valueKind": "string", "doc": "A declared dispenser label to activate." }
+      ],
+      "inputs": [ { "name": "use", "type": "Bool" } ],
+      "outputs": []
+    },
+    {
+      "name": "Trigger",
+      "wsch": "trigger",
+      "doc": "A beam scanner / proximity trigger.",
+      "params": [
+        { "name": "range", "valueKind": "number", "doc": "10–500. Default 100." },
+        { "name": "filter_type", "valueKind": "enum", "enumValues": ["Everything", "PlayerOnly", "EntityOnly", "ConstructOnly"], "doc": "What the beam detects. Default Everything." },
+        { "name": "info_source", "valueKind": "enum", "enumValues": ["Default", "PlayerJob", "PlayerWallet", "Health", "PlayerPocket", "PlayerEquipment"], "doc": "What `trigger_info` reports. Default Default." }
+      ],
+      "inputs": [ { "name": "reset_count", "type": "Bool" } ],
+      "outputs": [
+        { "name": "triggered", "type": "Bool" },
+        { "name": "trigger_distance", "type": "Number" },
+        { "name": "trigger_count", "type": "Number" },
+        { "name": "trigger_info", "type": "Any" }
+      ]
+    },
+    {
+      "name": "MoneyPot",
+      "wsch": "money_pot",
+      "doc": "Collects and dispenses money between zones.",
+      "params": [
+        { "name": "in_zone", "valueKind": "string", "doc": "Zone money drops into on press/drop_all, e.g. \"public\"." },
+        { "name": "out_zone", "valueKind": "string", "doc": "Zone the `return` drops into, e.g. \"private\"." },
+        { "name": "catches", "valueKind": "string", "doc": "Optional zone to catch money from (vault bridging)." }
+      ],
+      "inputs": [
+        { "name": "drop_all", "type": "Bool" },
+        { "name": "lock", "type": "Bool" },
+        { "name": "return", "type": "Number" }
+      ],
+      "outputs": [
+        { "name": "total_amount", "type": "Number" },
+        { "name": "last_amount", "type": "Number" }
+      ]
+    },
+    {
+      "name": "Forcer",
+      "wsch": "forcer",
+      "doc": "Applies physical force to props.",
+      "params": [
+        { "name": "force_amount", "valueKind": "number", "doc": "1–2500. Default 100." },
+        { "name": "range", "valueKind": "number", "doc": "10–500. Default 100." },
+        { "name": "uniform", "valueKind": "bool", "doc": "Uniform force regardless of distance. Default false." }
+      ],
+      "inputs": [ { "name": "force", "type": "Bool" } ],
+      "outputs": [ { "name": "forcing", "type": "Bool" } ]
+    },
+    {
+      "name": "Led",
+      "wsch": "led",
+      "doc": "An indicator light.",
+      "params": [
+        { "name": "off_color", "valueKind": "color", "doc": "RGBA tuple. Default red (1,0,0,1)." },
+        { "name": "on_color", "valueKind": "color", "doc": "RGBA tuple. Default green (0,1,0,1)." }
+      ],
+      "inputs": [ { "name": "state", "type": "Bool" } ],
+      "outputs": []
+    },
+    {
+      "name": "Notifier",
+      "wsch": "notifier",
+      "doc": "Posts a notification when its input changes.",
+      "params": [
+        { "name": "message", "valueKind": "string", "doc": "1–100 chars. Default \"Value Changed\"." },
+        { "name": "include_value", "valueKind": "bool", "doc": "Append the value to the message. Default false." },
+        { "name": "ignore_falsy", "valueKind": "bool", "doc": "Ignore falsy inputs. Default true." }
+      ],
+      "inputs": [ { "name": "notify", "type": "Any" } ],
+      "outputs": []
+    },
+    {
+      "name": "Interval",
+      "wsch": "interval",
+      "doc": "Emits a periodic pulse.",
+      "params": [
+        { "name": "interval", "valueKind": "number", "doc": "Seconds between pulses (>= one wire tick, <= 3600). Default 1.0." },
+        { "name": "hold", "valueKind": "number", "doc": "Seconds to hold the pulse high (0–600). Default 0." }
+      ],
+      "inputs": [ { "name": "halt", "type": "Bool" } ],
+      "outputs": [ { "name": "signal", "type": "Bool" } ]
+    },
+    {
+      "name": "Delay",
+      "wsch": "delay",
+      "doc": "Delays its input by a fixed time.",
+      "params": [
+        { "name": "delay", "valueKind": "number", "doc": "Seconds to delay (1–60). Default 1." }
+      ],
+      "inputs": [ { "name": "input", "type": "Any" }, { "name": "clear", "type": "Bool" } ],
+      "outputs": [ { "name": "output", "type": "Any" } ]
+    },
+    {
+      "name": "Memory",
+      "wsch": "memory",
+      "doc": "Stores a value until cleared (persistent state).",
+      "params": [],
+      "inputs": [ { "name": "input", "type": "Any" }, { "name": "store", "type": "Bool" }, { "name": "clear", "type": "Bool" } ],
+      "outputs": [ { "name": "output", "type": "Any" }, { "name": "has_value", "type": "Bool" } ]
+    },
+    {
+      "name": "Camera",
+      "wsch": "camera",
+      "doc": "A camera source identified by name.",
+      "params": [
+        { "name": "identifier", "valueKind": "string", "doc": "Camera id. Default \"cam-0\" (emitted as \"camera:<id>\")." }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "camera", "type": "String" } ]
+    },
+    {
+      "name": "Target",
+      "wsch": "target",
+      "doc": "A damage target that reports hits.",
+      "params": [],
+      "inputs": [ { "name": "reset_damage", "type": "Bool" }, { "name": "reset_hits", "type": "Bool" } ],
+      "outputs": [
+        { "name": "total_damage", "type": "Number" },
+        { "name": "damage", "type": "Number" },
+        { "name": "attacker", "type": "String" },
+        { "name": "inflictor", "type": "String" },
+        { "name": "attacker_distance", "type": "Number" },
+        { "name": "attacker_accuracy", "type": "Number" },
+        { "name": "hits", "type": "Number" }
+      ]
+    },
+    {
+      "name": "Synthesizer",
+      "wsch": "synthesizer",
+      "doc": "Text-to-speech synthesizer.",
+      "params": [
+        { "name": "volume", "valueKind": "number", "doc": "0.0–1.0. Default 1.0." },
+        { "name": "pitch", "valueKind": "number", "doc": "0.1–3.0. Default 1.0." },
+        { "name": "auto_play", "valueKind": "bool", "doc": "Speak automatically when text changes. Default true." }
+      ],
+      "inputs": [ { "name": "text", "type": "String" }, { "name": "play", "type": "Bool" } ],
+      "outputs": []
+    }
+  ]
+}

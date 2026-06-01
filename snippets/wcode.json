@@ -1,0 +1,83 @@
+{
+  "Module declaration": {
+    "prefix": "module",
+    "body": ["module ${1:name}"],
+    "description": "Module name (first line of the file)."
+  },
+  "Input port": {
+    "prefix": "input",
+    "body": ["input ${1:name}: ${2|Number,Bool,String,Any|} @${3|scanner,money,button,keypad|}"],
+    "description": "A boundary read backed by a construct."
+  },
+  "Output port": {
+    "prefix": "output",
+    "body": ["output ${1:name}: ${2|Number,Bool,String,Any|} @${3|screen,led,notify|} = ${4:expr}"],
+    "description": "A boundary write; must be driven by an expression."
+  },
+  "Let binding": {
+    "prefix": "let",
+    "body": ["let ${1:name} = ${2:expr}"],
+    "description": "An immutable binding."
+  },
+  "Function": {
+    "prefix": "func",
+    "body": [
+      "func ${1:name}(${2:p}: ${3|Number,Bool,String,Any|}) -> ${4|Number,Bool,String,Any|} {",
+      "\t${0:return p}",
+      "}"
+    ],
+    "description": "A reusable, non-recursive sub-circuit."
+  },
+  "Section": {
+    "prefix": "section",
+    "body": ["[Name=\"${1:Section name}\"] {", "\t$0", "}"],
+    "description": "Group lowered nodes into a named region."
+  },
+  "Lookup table function": {
+    "prefix": "table",
+    "body": [
+      "func ${1:lookup}(${2:i}: Number) -> Number {",
+      "\tlet ${3:table}: [Number] = [${4:1.0, 2.0, 3.0}]",
+      "\treturn ${3:table}[${2:i} - 1]",
+      "}"
+    ],
+    "description": "A lookup-table function (runtime index → multiplexer)."
+  },
+  "Test": {
+    "prefix": "test",
+    "body": [
+      "@Test(\"${1:name}\", arguments: [${2:(1, 1.0)}])",
+      "func ${3:check}(${4:a}: Number, ${5:b}: Number) {",
+      "\tbeam(${6:input}, 5, ${4:a})",
+      "\ttick(${7:3})",
+      "\t#expect(${8:output} == ${5:b})",
+      "}"
+    ],
+    "description": "A @Test with argument rows running against the compiled circuit."
+  },
+  "Expect": {
+    "prefix": "expect",
+    "body": ["#expect(${1:cond})"],
+    "description": "Record a failure if cond is false (keeps running)."
+  },
+  "Require": {
+    "prefix": "require",
+    "body": ["try #require(${1:cond})"],
+    "description": "Abort this argument row if cond is false."
+  },
+  "Memory device": {
+    "prefix": "Memory",
+    "body": ["let ${1:mem} = Memory()"],
+    "description": "Persistent-state device."
+  },
+  "MoneyPot device": {
+    "prefix": "MoneyPot",
+    "body": ["let ${1:pot} = MoneyPot(in_zone: \"${2:public}\", out_zone: \"${3:private}\")"],
+    "description": "A money pot construct."
+  },
+  "Gate device": {
+    "prefix": "Gate",
+    "body": ["let ${1:g} = Gate(type: ${2|And,Or,Not,Xor,Add,Subtract,Multiply,Divide,GreaterEqual,LessEqual,Equal,Random|})"],
+    "description": "A logic/arithmetic gate construct."
+  }
+}

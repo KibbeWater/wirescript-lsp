@@ -1,0 +1,156 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Wirescript",
+  "scopeName": "source.wcode",
+  "fileTypes": ["wcode"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#section-header" },
+    { "include": "#test-attribute" },
+    { "include": "#port-attributes" },
+    { "include": "#attributes" },
+    { "include": "#test-macros" },
+    { "include": "#func-definition" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#constants" },
+    { "include": "#world" },
+    { "include": "#constructs" },
+    { "include": "#builtins" },
+    { "include": "#member-access" },
+    { "include": "#operators" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.wcode",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.wcode",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.wcode", "match": "\\\\." }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.wcode",
+          "match": "\\b[0-9]+(?:\\.[0-9]+)?\\b"
+        }
+      ]
+    },
+    "section-header": {
+      "match": "(\\[)\\s*(Name)\\s*(=)",
+      "captures": {
+        "1": { "name": "punctuation.section.brackets.begin.wcode" },
+        "2": { "name": "keyword.other.section.wcode" },
+        "3": { "name": "keyword.operator.assignment.wcode" }
+      }
+    },
+    "test-attribute": {
+      "match": "(@)(Test)\\b",
+      "captures": {
+        "1": { "name": "punctuation.definition.decorator.wcode" },
+        "2": { "name": "entity.name.function.decorator.wcode" }
+      }
+    },
+    "port-attributes": {
+      "match": "(@)(scanner|money|button|keypad|screen|led|notify)\\b",
+      "captures": {
+        "1": { "name": "punctuation.definition.decorator.wcode" },
+        "2": { "name": "support.type.attribute.wcode" }
+      }
+    },
+    "attributes": {
+      "match": "(@)([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "punctuation.definition.decorator.wcode" },
+        "2": { "name": "entity.other.attribute-name.wcode" }
+      }
+    },
+    "test-macros": {
+      "match": "(#)(expect|require)\\b",
+      "captures": {
+        "1": { "name": "punctuation.definition.macro.wcode" },
+        "2": { "name": "keyword.control.test.wcode" }
+      }
+    },
+    "func-definition": {
+      "match": "\\b(func)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "storage.type.function.wcode" },
+        "2": { "name": "entity.name.function.wcode" }
+      }
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.import.wcode",
+          "match": "\\b(module|import)\\b"
+        },
+        {
+          "name": "keyword.control.wcode",
+          "match": "\\b(if|else|return|try)\\b"
+        },
+        {
+          "name": "storage.type.wcode",
+          "match": "\\b(input|output|let|var|func)\\b"
+        }
+      ]
+    },
+    "types": {
+      "name": "support.type.wcode",
+      "match": "\\b(Number|Bool|String|Any)\\b"
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.wcode",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "world": {
+      "match": "^\\s*(owner|player|dispenser)\\b",
+      "captures": {
+        "1": { "name": "keyword.other.world.wcode" }
+      }
+    },
+    "constructs": {
+      "name": "support.class.construct.wcode",
+      "match": "\\b(Gate|Constant|Button|Keypad|Screen|Speaker|User|Trigger|MoneyPot|Forcer|Led|Notifier|Interval|Delay|Memory|Camera|Target|Synthesizer)\\b"
+    },
+    "builtins": {
+      "name": "support.function.builtin.wcode",
+      "match": "\\b(beamClear|beam|press|deposit|submit|reset|force|damage|select|tick|wait)\\b(?=\\s*\\()"
+    },
+    "member-access": {
+      "match": "(\\.)([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "punctuation.accessor.wcode" },
+        "2": { "name": "variable.other.property.wcode" }
+      }
+    },
+    "operators": {
+      "name": "keyword.operator.wcode",
+      "match": "->|==|!=|<=|>=|&&|\\|\\||[-+*/%<>!?=]"
+    },
+    "punctuation": {
+      "patterns": [
+        { "name": "punctuation.separator.wcode", "match": "[,;:]" },
+        { "name": "punctuation.section.parens.wcode", "match": "[()]" },
+        { "name": "punctuation.section.brackets.wcode", "match": "[\\[\\]]" },
+        { "name": "punctuation.section.braces.wcode", "match": "[{}]" }
+      ]
+    }
+  }
+}
