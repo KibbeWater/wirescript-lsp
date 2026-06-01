@@ -67,6 +67,8 @@ export function provideHover(model: DocModel, line: string, pos: Position): Hove
   if (sigil === "@") {
     if (w.word === catalog.testAttribute.name)
       return hover(`**@Test** — \`${catalog.testAttribute.signature}\`\n\n${catalog.testAttribute.doc}`, range);
+    if (w.word === catalog.exportAttribute.name)
+      return hover(`**@export** — \`${catalog.exportAttribute.signature}\`\n\n${catalog.exportAttribute.doc}`, range);
     const a = findInputAttr(w.word) ?? findOutputAttr(w.word);
     if (a) return hover(`**@${a.name}** — backs the port with a \`${a.construct}\`.\n\n${a.doc}`, range);
     return null;

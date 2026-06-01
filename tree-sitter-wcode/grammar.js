@@ -51,6 +51,7 @@ module.exports = grammar({
         $.import_decl,
         $.port_decl,
         $.binding,
+        $.export_binding,
         $.func_decl,
         $.section,
         $.test_decl,
@@ -75,6 +76,18 @@ module.exports = grammar({
       ),
 
     attribute: ($) => seq("@", field("name", $.identifier)),
+
+    // `@export(name: "…") let x = <const>` — an item-level decorator on a value
+    // binding (the parentheses are optional: `@export let x = 5`).
+    export_binding: ($) =>
+      seq(
+        "@",
+        field("attr", $.identifier),
+        optional(seq("(", repeat($.export_arg), ")")),
+        field("binding", $.binding),
+      ),
+    export_arg: ($) =>
+      seq(field("label", $.identifier), ":", field("value", $._expr), optional(",")),
 
     binding: ($) =>
       seq(

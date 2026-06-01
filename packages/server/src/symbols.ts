@@ -89,13 +89,17 @@ export function buildModel(text: string): DocModel {
     if (testDepth !== -1) testBodyLines.add(li);
     if (/@\s*Test\b/.test(s)) pendingTest = true;
 
+    // A `@export(...)` decorator may sit on the same line as its `let` binding;
+    // strip it so the binding is still picked up.
+    const decl = s.replace(/^(\s*)@\s*export\b\s*(\([^)]*\))?\s*/, "$1");
+
     let m: RegExpExecArray | null;
 
-    if ((m = RE_PORT.exec(s))) {
+    if ((m = RE_PORT.exec(decl))) {
       const kind = m[1] as "input" | "output";
       const type = norm(m[3]);
       symbols.push({ name: m[2], kind, type, detail: `${kind} ${m[2]}: ${type}`, line: li });
-    } else if ((m = RE_DEVICE.exec(s)) && getConstruct(m[2])) {
+    } else if ((m = RE_DEVICE.exec(decl)) && getConstruct(m[2])) {
       devices.set(m[1], m[2]);
       symbols.push({
         name: m[1],
@@ -105,11 +109,11 @@ export function buildModel(text: string): DocModel {
         detail: `let ${m[1]} = ${m[2]}(…)`,
         line: li,
       });
-    } else if ((m = RE_LET.exec(s))) {
+    } else if ((m = RE_LET.exec(decl))) {
       symbols.push({ name: m[1], kind: "let", detail: `let ${m[1]}`, line: li });
     }
 
-    if ((m = RE_FUNC.exec(s))) {
+    if ((m = RE_FUNC.exec(decl))) {
       const isTestFunc = pendingTest;
       const params = m[2].trim();
       const ret = m[3] ? norm(m[3]) : undefined;

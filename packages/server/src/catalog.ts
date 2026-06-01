@@ -68,6 +68,7 @@ export interface Catalog {
   inputAttrs: AttrDef[];
   outputAttrs: AttrDef[];
   testAttribute: { name: string; signature: string; doc: string };
+  exportAttribute: { name: string; signature: string; doc: string; params: Param[] };
   testMacros: MacroDef[];
   dslBuiltins: DslBuiltin[];
   worldDecls: WorldDecl[];

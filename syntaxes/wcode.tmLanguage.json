@@ -57,7 +57,8 @@
       }
     },
     "test-attribute": {
-      "match": "(@)(Test)\\b",
+      "comment": "Item-level decorators: @Test on a func, @export on a constant let.",
+      "match": "(@)(Test|export)\\b",
       "captures": {
         "1": { "name": "punctuation.definition.decorator.wcode" },
         "2": { "name": "entity.name.function.decorator.wcode" }

@@ -52,6 +52,14 @@
     "signature": "@Test(\"name\", arguments: [(row0...), (row1...)])",
     "doc": "Declares a Swift-Testing-flavored test that runs against the real compiled circuit. Each `arguments` row gets its own fresh build. The following `func`'s parameters receive the row values."
   },
+  "exportAttribute": {
+    "name": "export",
+    "signature": "@export(name: \"...\") let x = <const>",
+    "doc": "Decorates a constant value binding so it is lifted out of the merged logic bundle as a named, **operator-tunable** control node — kept out of constant pooling/folding so it survives as its own node. The binding value must be a constant literal (number, bool or string). The parentheses are optional.",
+    "params": [
+      { "name": "name", "valueKind": "string", "doc": "Operator-facing label for the control. Defaults to the binding name." }
+    ]
+  },
   "testMacros": [
     { "name": "expect", "sigil": "#", "signature": "#expect(cond)", "doc": "Record a failure if `cond` is false, but keep running the row. `cond` must be exactly `Bool`." },
     { "name": "require", "sigil": "#", "prefix": "try", "signature": "try #require(cond)", "doc": "Like `#expect`, but aborts the current argument row on failure. Written with the `try` prefix." }

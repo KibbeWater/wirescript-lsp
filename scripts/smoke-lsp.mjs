@@ -56,6 +56,9 @@ const SAMPLE = `module showcase
 let mem = Memory()
 let g = Gate(type: )
 input x: Number @scanner
+@export(name: "")
+let bonus = 5
+@
 [Name="r"] {
   output y: Number @screen = mem.
 }
@@ -99,15 +102,21 @@ function expect(name, labels, wanted) {
   // line 2: `let g = Gate(type: )` — cursor after `type: ` -> gate ops
   expect("gate enum values", await labelsAt(2, 19), ["GreaterEqual", "And", "Random"]);
 
-  // line 5: `  output y: Number @screen = mem.` -> Memory ports
-  const memLine = SAMPLE.split("\n")[5];
-  expect("member ports (mem.)", await labelsAt(5, memLine.length), ["output", "has_value", "input", "store", "clear"]);
+  // line 8: `  output y: Number @screen = mem.` -> Memory ports
+  const memLine = SAMPLE.split("\n")[8];
+  expect("member ports (mem.)", await labelsAt(8, memLine.length), ["output", "has_value", "input", "store", "clear"]);
 
   // line 3: `input x: Number @scanner` — after `@` -> input attrs.
   expect("input attributes", await labelsAt(3, "input x: Number @".length), ["scanner", "money", "button", "keypad"]);
 
-  // line 10: empty line inside the @Test body -> DSL builtins available
-  expect("test DSL builtins", await labelsAt(10, 2), ["beam", "tick", "deposit"]);
+  // line 6: bare `@` at item level -> decorators (@Test, @export)
+  expect("item decorators (@)", await labelsAt(6, 1), ["Test", "export"]);
+
+  // line 4: inside `@export(` -> the `name:` argument
+  expect("export argument", await labelsAt(4, "@export(".length), ["name"]);
+
+  // line 13: empty line inside the @Test body -> DSL builtins available
+  expect("test DSL builtins", await labelsAt(13, 2), ["beam", "tick", "deposit"]);
 
   // hover on `Memory`
   const hov = await send("textDocument/hover", { textDocument: { uri }, position: { line: 1, character: 10 } });

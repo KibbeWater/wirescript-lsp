@@ -42,9 +42,11 @@
 (require_stmt name: (identifier) @function.macro)
 "#" @punctuation.special
 
-; --- attributes -------------------------------------------------------------
+; --- attributes / decorators -----------------------------------------------
 (attribute "@" @attribute (identifier) @attribute)
 (test_decl "@" @attribute attr: (identifier) @attribute)
+(export_binding "@" @attribute attr: (identifier) @attribute)
+(export_arg label: (identifier) @property)
 
 ; --- parameters, labels, properties ----------------------------------------
 (param name: (identifier) @variable.parameter)

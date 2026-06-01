@@ -89,16 +89,29 @@ function attrCompletions(line: string): CompletionItem[] {
   if (onInput) catalog.inputAttrs.forEach((a) => add(a.name, a.doc));
   else if (onOutput) catalog.outputAttrs.forEach((a) => add(a.name, a.doc));
   else {
-    catalog.inputAttrs.forEach((a) => add(a.name, a.doc));
-    catalog.outputAttrs.forEach((a) => add(a.name, a.doc));
+    // Item-level `@` decorators: `@Test(...)` on a func, `@export(...)` on a let.
     items.push(
       snippet(catalog.testAttribute.name, 'Test("$1", arguments: [$2])$0', CompletionItemKind.Function, {
         detail: catalog.testAttribute.signature,
         documentation: md(catalog.testAttribute.doc),
       }),
+      snippet(catalog.exportAttribute.name, 'export(name: "$1") $0', CompletionItemKind.Function, {
+        detail: catalog.exportAttribute.signature,
+        documentation: md(catalog.exportAttribute.doc),
+      }),
     );
   }
   return items;
+}
+
+function exportArgCompletions(): CompletionItem[] {
+  const p = catalog.exportAttribute.params[0];
+  return [
+    snippet(p.name, `${p.name}: "$1"`, CompletionItemKind.Property, {
+      detail: `${p.name}: string`,
+      documentation: p.doc ? md(p.doc) : undefined,
+    }),
+  ];
 }
 
 function macroCompletions(before: string): CompletionItem[] {
@@ -233,6 +246,10 @@ export function provideCompletions(model: DocModel, line: string, pos: Position)
 
   // 2. attribute: @<word>
   if (/@\w*$/.test(before)) return attrCompletions(line);
+
+  // 2b. inside `@export( … )` — offer the `name:` argument label.
+  const exp = /@\s*export\s*\(([^)]*)$/.exec(before);
+  if (exp) return /:/.test(exp[1]) ? [] : exportArgCompletions();
 
   // 3. test macro: #<word>
   if (/#\w*$/.test(before)) return macroCompletions(before);

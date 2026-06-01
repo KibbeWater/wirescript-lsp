@@ -30,6 +30,11 @@ let vault = MoneyPot(in_zone: "public", out_zone: "private")
 let act = User(target: "vendor")
 
 [Name="Resolve"] {
+  // an operator-tunable constant, lifted out of the logic bundle as its own
+  // named control node (parentheses optional: `@export let edge = 1.0`)
+  @export(name: "HOUSE EDGE")
+  let edge = 1.0
+
   let isLower    = dir == 2
   let lookupRank = isLower ? 14 - dealer : dealer
   let mult       = higher(lookupRank)
@@ -42,7 +47,7 @@ let act = User(target: "vendor")
 
   output multiplier: Number @screen = mult
   output win:        Bool   @led    = won
-  output payout:     Number @screen = won ? pot * mult : 0
+  output payout:     Number @screen = won ? pot * mult * edge : 0
   output held:       Number @screen = mem.output
 }
 
