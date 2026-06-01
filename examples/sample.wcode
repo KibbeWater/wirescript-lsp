@@ -1,0 +1,57 @@
+// sample.wcode — exercises the full surface for manual highlighting/completion
+// checks. Mirrors the constructs and patterns from the wiremod-scheme examples.
+
+module showcase
+
+// --- boundary ports (one of each input attribute) ---------------------------
+input dealer: Number @scanner    // a card scanner (Trigger)
+input dir:    Number @scanner    // 1 = Higher, 2 = Lower, 3 = Same
+input pot:    Number @money      // bet escrowed in a MoneyPot
+input buy:    Number @button     // a Button
+
+// --- world ------------------------------------------------------------------
+owner 1
+player 1 wallet: 1000
+dispenser "vendor" selected: "ak" stock: [("ak", 3)]
+
+// --- a lookup-table function ------------------------------------------------
+[Name="Higher table"] {
+  func higher(rank: Number) -> Number {
+    let table: [Number] = [1.05, 1.15, 1.25, 1.40, 1.55, 1.75,
+                           1.90, 2.10, 2.60, 3.50, 5.00, 10.00]
+    return table[rank - 1]            // runtime index -> sum-of-indicators
+  }
+}
+
+// --- devices: instantiation, member reads, input wiring ---------------------
+let mem = Memory()
+let gate = Gate(type: GreaterEqual)
+let vault = MoneyPot(in_zone: "public", out_zone: "private")
+let act = User(target: "vendor")
+
+[Name="Resolve"] {
+  let isLower    = dir == 2
+  let lookupRank = isLower ? 14 - dealer : dealer
+  let mult       = higher(lookupRank)
+  let won        = dealer > 0 && mult >= 1.5
+
+  // wire values into device input ports
+  mem.input = pot
+  mem.store = won
+  act.use   = pot >= 100 && !isLower
+
+  output multiplier: Number @screen = mult
+  output win:        Bool   @led    = won
+  output payout:     Number @screen = won ? pot * mult : 0
+  output held:       Number @screen = mem.output
+}
+
+// --- tests against the compiled circuit -------------------------------------
+@Test("higher column", arguments: [(1, 1.05), (2, 1.15), (12, 10.00)])
+func higherCol(d: Number, m: Number) {
+  beam(dealer, 5, d)
+  beam(dir, 5, 1)
+  tick(3)
+  #expect(multiplier == m)
+  try #require(win == true)
+}
