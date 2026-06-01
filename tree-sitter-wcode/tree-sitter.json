@@ -1,0 +1,20 @@
+{
+  "grammars": [
+    {
+      "name": "wcode",
+      "scope": "source.wcode",
+      "file-types": ["wcode"],
+      "highlights": ["queries/highlights.scm"],
+      "locals": ["queries/locals.scm"],
+      "injection-regex": "^wcode$"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "tree-sitter grammar for the .wcode wirescript language.",
+    "links": {
+      "repository": "https://github.com/KibbeWater/wirescript-lsp"
+    }
+  }
+}
