@@ -1,0 +1,88 @@
+{
+  "name": "wcode-vscode",
+  "displayName": "Wirescript (.wcode)",
+  "description": "Syntax highlighting and IntelliSense for the .wcode wirescript language (s&box Wiremod schematics).",
+  "version": "0.1.0",
+  "publisher": "kibbewater",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages"],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:wcode"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "wcode",
+        "aliases": ["Wirescript", "wcode"],
+        "extensions": [".wcode"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "wcode",
+        "scopeName": "source.wcode",
+        "path": "./syntaxes/wcode.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "wcode",
+        "path": "./snippets/wcode.json"
+      }
+    ],
+    "configuration": {
+      "title": "Wirescript",
+      "properties": {
+        "wcode.compilerPath": {
+          "type": "string",
+          "default": "wiremod-scheme",
+          "markdownDescription": "Path to the `wiremod-scheme` binary used for live diagnostics, validation, tests and graphs. Defaults to `wiremod-scheme` on your PATH."
+        },
+        "wcode.diagnostics.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show compiler errors/warnings in the editor by running the compiler."
+        },
+        "wcode.diagnostics.run": {
+          "type": "string",
+          "enum": ["onSave", "onType"],
+          "enumDescriptions": [
+            "Validate when the file is saved (resolves relative imports against the saved file).",
+            "Validate as you type, debounced (writes a sibling temp file to reflect unsaved edits)."
+          ],
+          "default": "onSave",
+          "description": "When to run live diagnostics."
+        }
+      }
+    },
+    "commands": [
+      { "command": "wcode.validate", "title": "Wirescript: Validate File", "category": "Wirescript" },
+      { "command": "wcode.test", "title": "Wirescript: Run @Test Suite", "category": "Wirescript" },
+      { "command": "wcode.graph", "title": "Wirescript: Show Wiring Graph", "category": "Wirescript" }
+    ],
+    "menus": {
+      "commandPalette": [
+        { "command": "wcode.validate", "when": "editorLangId == wcode" },
+        { "command": "wcode.test", "when": "editorLangId == wcode" },
+        { "command": "wcode.graph", "when": "editorLangId == wcode" }
+      ]
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "node ../../scripts/build.mjs",
+    "vscode:prepublish": "node ../../scripts/build.mjs"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.19.0"
+  }
+}
