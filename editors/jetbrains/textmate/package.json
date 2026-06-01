@@ -1,0 +1,24 @@
+{
+  "name": "wcode-textmate",
+  "displayName": "Wirescript (.wcode)",
+  "version": "0.1.0",
+  "description": "TextMate bundle for .wcode highlighting, importable by JetBrains IDEs.",
+  "engines": { "vscode": "*" },
+  "contributes": {
+    "languages": [
+      {
+        "id": "wcode",
+        "aliases": ["Wirescript", "wcode"],
+        "extensions": [".wcode"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "wcode",
+        "scopeName": "source.wcode",
+        "path": "./wcode.tmLanguage.json"
+      }
+    ]
+  }
+}
