@@ -1,0 +1,23 @@
+{
+  "name": "wcode-language-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Language server for the .wcode wirescript language (completion, hover, symbols, diagnostics).",
+  "license": "MIT",
+  "main": "out/server.js",
+  "bin": {
+    "wcode-language-server": "out/server.js"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "node ../../scripts/build.mjs"
+  },
+  "dependencies": {
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11",
+    "vscode-uri": "^3.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0"
+  }
+}
